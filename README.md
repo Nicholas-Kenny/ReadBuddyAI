@@ -90,6 +90,19 @@ GEMINI_API_KEY="AIzaSy..."
 NEXT_PUBLIC_SUPABASE_URL="[https://your-project.supabase.co](https://your-project.supabase.co)"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
+
+### Mode lokal tanpa Supabase atau Gemini
+
+Untuk menjalankan seluruh alur secara lokal tanpa Docker, Supabase CLI, atau API key, gunakan:
+
+```env
+NEXT_PUBLIC_USE_LOCAL_DB=true
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=local-development-placeholder
+GEMINI_API_KEY=local-development-placeholder
+```
+
+Data kelas, profil, cerita, assignment, dan hasil skrining disimpan di `.local-data/readbuddy.json`. Folder ini diabaikan Git. Generator memakai cerita fallback lokal; ubah `NEXT_PUBLIC_USE_LOCAL_DB=false` dan isi kredensial asli untuk memakai Supabase dan Gemini.
 4. Setup Skema Database (Supabase SQL Editor)
 Jalankan skrip SQL berikut di dashboard Supabase Anda
 
