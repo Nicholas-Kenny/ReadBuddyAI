@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import {
-  LocalDbOperation,
-  runLocalDbOperation,
-} from "@/lib/localDbServer";
+import { LocalDbOperation, runLocalDbOperation } from "@/lib/localDbServer";
 
 export async function POST(request: Request) {
   if (process.env.NEXT_PUBLIC_USE_LOCAL_DB !== "true") {
-    return NextResponse.json({ error: "Local database is disabled" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Local database is disabled" },
+      { status: 404 },
+    );
   }
 
   try {
@@ -15,7 +15,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ data });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Local database failed" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Local database operation failed",
+      },
       { status: 500 },
     );
   }

@@ -8,6 +8,18 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const FOLKLORE_COUNTRIES = ["Indonesia 🇮🇩", "Philippines 🇵🇭", "Malaysia 🇲🇾"];
 
+// Model priority list for automatic cascading fallback on rate limit / quota exhaustion
+const CANDIDATE_MODELS = Array.from(
+  new Set([
+    process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+  ]),
+);
+
 const GRADE_CONFIG: Record<
   string,
   {
@@ -97,31 +109,77 @@ function createLocalQuest(interest: string, refinementPrompt?: string) {
       weight: 15,
       prompt: `What did ${learner} do with the class?`,
       options: [
-        { id: "c1_1", text: theme.goal, emojiFallback: theme.emoji, bgColor: "", score: 15 },
-        { id: "c1_2", text: "Stayed home and watched television", emojiFallback: "📺", bgColor: "", score: 0 },
-        { id: "c1_3", text: "Left the group without helping", emojiFallback: "🚶", bgColor: "", score: 0 },
+        {
+          id: "c1_1",
+          text: theme.goal,
+          emojiFallback: theme.emoji,
+          bgColor: "",
+          score: 15,
+        },
+        {
+          id: "c1_2",
+          text: "Stayed home and watched television",
+          emojiFallback: "📺",
+          bgColor: "",
+          score: 0,
+        },
+        {
+          id: "c1_3",
+          text: "Left the group without helping",
+          emojiFallback: "🚶",
+          bgColor: "",
+          score: 0,
+        },
       ],
     },
     c2: {
       weight: 25,
       prompt: "Match each action to its outcome.",
       pairs: [
-        { id: "p1", causeText: "The class shared their tools", causeEmoji: "🧰", effectText: "Everyone could finish the task", effectEmoji: "✅", weight: 12.5 },
-        { id: "p2", causeText: "They worked carefully", causeEmoji: "🤲", effectText: "The place became safer", effectEmoji: "🌟", weight: 12.5 },
+        {
+          id: "p1",
+          causeText: "The class shared their tools",
+          causeEmoji: "🧰",
+          effectText: "Everyone could finish the task",
+          effectEmoji: "✅",
+          weight: 12.5,
+        },
+        {
+          id: "p2",
+          causeText: "They worked carefully",
+          causeEmoji: "🤲",
+          effectText: "The place became safer",
+          effectEmoji: "🌟",
+          weight: 12.5,
+        },
       ],
     },
     c3: {
       weight: 30,
-      scenario: "Your class wants to improve a shared place. Arrange the plan from first to last.",
+      scenario:
+        "Your class wants to improve a shared place. Arrange the plan from first to last.",
       steps: [
-        { id: "step_1", text: "Notice what needs help and understand the problem.", order: 1 },
-        { id: "step_2", text: "Invite classmates and prepare safe tools to share.", order: 2 },
-        { id: "step_3", text: "Finish the task together and explain how to keep the place safe.", order: 3 },
+        {
+          id: "step_1",
+          text: "Notice what needs help and understand the problem.",
+          order: 1,
+        },
+        {
+          id: "step_2",
+          text: "Invite classmates and prepare safe tools to share.",
+          order: 2,
+        },
+        {
+          id: "step_3",
+          text: "Finish the task together and explain how to keep the place safe.",
+          order: 3,
+        },
       ],
     },
     c4: {
       weight: 30,
-      claim: "Working together helped the class finish safely and improve the place.",
+      claim:
+        "Working together helped the class finish safely and improve the place.",
       instruction: "Select the two sentences that best support the claim.",
       requiredSelections: 2,
       evidence: passageText
@@ -146,6 +204,7 @@ export async function POST(req: Request) {
       location,
       assignedActivities,
       refinementPrompt,
+      targetLanguage = "English",
       autoSave = true,
     } = await req.json();
 
@@ -185,7 +244,7 @@ export async function POST(req: Request) {
     }
 
     const prompt = `You are an early-grade literacy assessment specialist.
-Generate an educational reading screening passage and Bloom's Taxonomy (C1-C4) question matrix in English.
+Generate an educational reading screening passage and Bloom's Taxonomy (C1-C4) question matrix strictly in ${targetLanguage}.
 
 Target Parameters:
 - Target Grade: ${grade} (Length: ${selectedGrade.words})
@@ -193,7 +252,12 @@ Target Parameters:
 - Teacher Story Brief: ${refinementPrompt || "No extra brief. Create a broadly useful category story."}
 - Student: ${studentName || "Class assignment"}
 - Student Location: ${location || "Not provided"}. Use it only for familiar, age-appropriate context; do not state or infer private details.
-- Assigned Activities: ${Object.entries(assignedActivities || {}).filter(([, enabled]) => enabled).map(([activity]) => activity).join(", ") || "All stages"}
+- Assigned Activities: ${
+      Object.entries(assignedActivities || {})
+        .filter(([, enabled]) => enabled)
+        .map(([activity]) => activity)
+        .join(", ") || "All stages"
+    }
 - Cultural/Country Setting: ${randomCountry}
 
 Difficulty Rules:
@@ -202,140 +266,155 @@ Difficulty Rules:
 - C3 (Applying - 30%): ${selectedGrade.c3Rule}. Create a Plan Builder with exactly 3 short action sentences. Store them in correct chronological order with order values 1, 2, and 3.
 - C4 (Analysing - 30%): ${selectedGrade.c4Rule}. Create an Evidence Detective claim and include every passage sentence as an evidence item. Exactly 2 sentences must strongly support the claim and score 15 each; every other sentence scores 0.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            title: { type: Type.STRING },
-            passageText: { type: Type.STRING },
-            wordCount: { type: Type.NUMBER },
-            c1: {
-              type: Type.OBJECT,
-              properties: {
-                weight: { type: Type.NUMBER },
-                prompt: { type: Type.STRING },
-                options: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      id: { type: Type.STRING },
-                      text: { type: Type.STRING },
-                      emojiFallback: { type: Type.STRING },
-                      bgColor: { type: Type.STRING },
-                      score: { type: Type.NUMBER },
-                    },
-                    required: [
-                      "id",
-                      "text",
-                      "emojiFallback",
-                      "bgColor",
-                      "score",
-                    ],
+    const schemaConfig = {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          title: { type: Type.STRING },
+          passageText: { type: Type.STRING },
+          wordCount: { type: Type.NUMBER },
+          c1: {
+            type: Type.OBJECT,
+            properties: {
+              weight: { type: Type.NUMBER },
+              prompt: { type: Type.STRING },
+              options: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    text: { type: Type.STRING },
+                    emojiFallback: { type: Type.STRING },
+                    bgColor: { type: Type.STRING },
+                    score: { type: Type.NUMBER },
                   },
+                  required: ["id", "text", "emojiFallback", "bgColor", "score"],
                 },
               },
-              required: ["weight", "prompt", "options"],
             },
-            c2: {
-              type: Type.OBJECT,
-              properties: {
-                weight: { type: Type.NUMBER },
-                prompt: { type: Type.STRING },
-                pairs: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      id: { type: Type.STRING },
-                      causeText: { type: Type.STRING },
-                      causeEmoji: { type: Type.STRING },
-                      effectText: { type: Type.STRING },
-                      effectEmoji: { type: Type.STRING },
-                      weight: { type: Type.NUMBER },
-                    },
-                    required: [
-                      "id",
-                      "causeText",
-                      "causeEmoji",
-                      "effectText",
-                      "effectEmoji",
-                      "weight",
-                    ],
-                  },
-                },
-              },
-              required: ["weight", "prompt", "pairs"],
-            },
-            c3: {
-              type: Type.OBJECT,
-              properties: {
-                weight: { type: Type.NUMBER },
-                scenario: { type: Type.STRING },
-                steps: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      id: { type: Type.STRING },
-                      text: { type: Type.STRING },
-                      order: { type: Type.NUMBER },
-                    },
-                    required: ["id", "text", "order"],
-                  },
-                },
-              },
-              required: ["weight", "scenario", "steps"],
-            },
-            c4: {
-              type: Type.OBJECT,
-              properties: {
-                weight: { type: Type.NUMBER },
-                claim: { type: Type.STRING },
-                instruction: { type: Type.STRING },
-                requiredSelections: { type: Type.NUMBER },
-                evidence: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      id: { type: Type.STRING },
-                      text: { type: Type.STRING },
-                      score: { type: Type.NUMBER },
-                    },
-                    required: ["id", "text", "score"],
-                  },
-                },
-              },
-              required: [
-                "weight",
-                "claim",
-                "instruction",
-                "requiredSelections",
-                "evidence",
-              ],
-            },
+            required: ["weight", "prompt", "options"],
           },
-          required: [
-            "title",
-            "passageText",
-            "wordCount",
-            "c1",
-            "c2",
-            "c3",
-            "c4",
-          ],
+          c2: {
+            type: Type.OBJECT,
+            properties: {
+              weight: { type: Type.NUMBER },
+              prompt: { type: Type.STRING },
+              pairs: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    causeText: { type: Type.STRING },
+                    causeEmoji: { type: Type.STRING },
+                    effectText: { type: Type.STRING },
+                    effectEmoji: { type: Type.STRING },
+                    weight: { type: Type.NUMBER },
+                  },
+                  required: [
+                    "id",
+                    "causeText",
+                    "causeEmoji",
+                    "effectText",
+                    "effectEmoji",
+                    "weight",
+                  ],
+                },
+              },
+            },
+            required: ["weight", "prompt", "pairs"],
+          },
+          c3: {
+            type: Type.OBJECT,
+            properties: {
+              weight: { type: Type.NUMBER },
+              scenario: { type: Type.STRING },
+              steps: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    text: { type: Type.STRING },
+                    order: { type: Type.NUMBER },
+                  },
+                  required: ["id", "text", "order"],
+                },
+              },
+            },
+            required: ["weight", "scenario", "steps"],
+          },
+          c4: {
+            type: Type.OBJECT,
+            properties: {
+              weight: { type: Type.NUMBER },
+              claim: { type: Type.STRING },
+              instruction: { type: Type.STRING },
+              requiredSelections: { type: Type.NUMBER },
+              evidence: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    text: { type: Type.STRING },
+                    score: { type: Type.NUMBER },
+                  },
+                  required: ["id", "text", "score"],
+                },
+              },
+            },
+            required: [
+              "weight",
+              "claim",
+              "instruction",
+              "requiredSelections",
+              "evidence",
+            ],
+          },
         },
+        required: ["title", "passageText", "wordCount", "c1", "c2", "c3", "c4"],
       },
-    });
+    };
 
-    const questData = JSON.parse(response.text || "{}");
+    let questData: any = null;
+    let successfulModel = "";
+
+    for (const model of CANDIDATE_MODELS) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: schemaConfig,
+        });
+
+        if (response.text) {
+          questData = JSON.parse(response.text);
+          successfulModel = model;
+          break;
+        }
+      } catch (modelError: any) {
+        console.warn(
+          `[Gemini Fallback] Model "${model}" failed (quota/limit): ${modelError.message}. Trying next candidate...`,
+        );
+      }
+    }
+
+    // Zero-downtime fallback to local algorithmic generator if all models hit quota
+    if (!questData) {
+      console.warn(
+        "[Gemini Fallback] All AI models exhausted. Falling back to local algorithmic template.",
+      );
+      questData = createLocalQuest(interest, refinementPrompt);
+    } else {
+      console.log(
+        `[Gemini Fallback] Generated successfully via ${successfulModel}`,
+      );
+    }
+
     const storyId = `story_${Date.now()}`;
-
     const newStoryRecord = {
       id: storyId,
       class_code: classCode,
@@ -346,13 +425,16 @@ Difficulty Rules:
       interest,
       country_origin: randomCountry,
       title: questData.title,
-      passage_text: questData.passageText,
+      passage_text: questData.passageText || questData.passage_text,
       word_count:
-        questData.wordCount || questData.passageText.split(/\s+/).length,
-      c1_data: questData.c1,
-      c2_data: questData.c2,
-      c3_data: questData.c3,
-      c4_data: questData.c4,
+        questData.wordCount ||
+        questData.passageText?.split(/\s+/).length ||
+        questData.passage_text?.split(/\s+/).length ||
+        50,
+      c1_data: questData.c1 || questData.c1_data,
+      c2_data: questData.c2 || questData.c2_data,
+      c3_data: questData.c3 || questData.c3_data,
+      c4_data: questData.c4 || questData.c4_data,
       is_verified: false,
     };
 
@@ -370,7 +452,7 @@ Difficulty Rules:
 
     return NextResponse.json(newStoryRecord);
   } catch (error: any) {
-    console.error("AI Quest Generation Error:", error);
+    console.error("AI Quest Generation Critical Error:", error);
     return NextResponse.json(
       { error: error.message || "Generation failed" },
       { status: 500 },

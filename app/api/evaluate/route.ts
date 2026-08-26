@@ -1,9 +1,22 @@
+// app/api/evaluate/route.ts
 import { NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
 import { supabase } from "@/lib/supabase";
 import { runLocalDbOperation } from "@/lib/localDbServer";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Model priority list for automatic cascading fallback on rate limit / quota exhaustion
+const CANDIDATE_MODELS = Array.from(
+  new Set([
+    process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+  ]),
+);
 
 export async function POST(req: Request) {
   try {
@@ -42,11 +55,7 @@ export async function POST(req: Request) {
       : normalizedBloom;
 
     const status =
-      compositeScore >= 75
-        ? "green"
-        : compositeScore >= 50
-          ? "yellow"
-          : "red";
+      compositeScore >= 75 ? "green" : compositeScore >= 50 ? "yellow" : "red";
 
     let strength = "Good reading engagement and strong factual understanding.";
     let weakness = "Occasional hesitation on multi-syllable terms.";
@@ -54,36 +63,57 @@ export async function POST(req: Request) {
     let feedback = "Great reading effort! Keep up the daily reading habit!";
 
     if (process.env.NEXT_PUBLIC_USE_LOCAL_DB !== "true") {
-      try {
-        const prompt = `Evaluate student screening:
+      const prompt = `Evaluate student screening:
 Student: ${studentName}, Story: "${storyTitle}", WCPM: ${hasOralReading ? wcpm : "not assigned"}, Acc: ${hasOralReading ? `${accuracy}%` : "not assigned"}, Assigned Bloom score: ${totalBloomScore}/${availableBloomPoints || 0} (${normalizedBloom}%).
 Diagnose concise strength, weakness, solution (for teacher), and feedback (for student).`;
 
-        const response = await ai.models.generateContent({
-          model: "gemini-3.6-flash",
-          contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                strength: { type: Type.STRING },
-                weakness: { type: Type.STRING },
-                solution: { type: Type.STRING },
-                feedback: { type: Type.STRING },
-              },
-              required: ["strength", "weakness", "solution", "feedback"],
-            },
+      const schemaConfig = {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            strength: { type: Type.STRING },
+            weakness: { type: Type.STRING },
+            solution: { type: Type.STRING },
+            feedback: { type: Type.STRING },
           },
-        });
+          required: ["strength", "weakness", "solution", "feedback"],
+        },
+      };
 
-        const aiData = JSON.parse(response.text || "{}");
-        if (aiData.strength) strength = aiData.strength;
-        if (aiData.weakness) weakness = aiData.weakness;
-        if (aiData.solution) solution = aiData.solution;
-        if (aiData.feedback) feedback = aiData.feedback;
-      } catch (e) {
-        console.warn("Gemini fallback used:", e);
+      let evaluated = false;
+
+      for (const model of CANDIDATE_MODELS) {
+        try {
+          const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: schemaConfig,
+          });
+
+          if (response.text) {
+            const aiData = JSON.parse(response.text);
+            if (aiData.strength) strength = aiData.strength;
+            if (aiData.weakness) weakness = aiData.weakness;
+            if (aiData.solution) solution = aiData.solution;
+            if (aiData.feedback) feedback = aiData.feedback;
+            evaluated = true;
+            console.log(
+              `[Gemini Fallback] Evaluated successfully using ${model}`,
+            );
+            break;
+          }
+        } catch (modelError: any) {
+          console.warn(
+            `[Gemini Fallback] Model "${model}" failed (quota/limit): ${modelError.message}. Trying next candidate...`,
+          );
+        }
+      }
+
+      if (!evaluated) {
+        console.warn(
+          "[Gemini Fallback] All evaluation models exhausted. Using default diagnostic template.",
+        );
       }
     }
 

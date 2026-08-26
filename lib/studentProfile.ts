@@ -2,22 +2,22 @@ export const INTEREST_CATEGORIES = [
   {
     title: "Folklore & Legends",
     emoji: "🐉",
-    description: "Legenda & dongeng ASEAN",
+    description: "ASEAN folklore & legends",
   },
   {
     title: "Nature & Mangroves",
     emoji: "🌿",
-    description: "Konservasi alam pesisir",
+    description: "Coastal nature & conservation",
   },
   {
     title: "Marine Life & Islands",
     emoji: "🌊",
-    description: "Terumbu karang & pulau",
+    description: "Coral reefs & island ecosystems",
   },
   {
     title: "Science & Wildlife",
     emoji: "🔬",
-    description: "Sains & satwa liar",
+    description: "Science & wildlife exploration",
   },
 ] as const;
 
