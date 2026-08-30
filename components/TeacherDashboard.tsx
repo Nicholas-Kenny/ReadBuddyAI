@@ -197,6 +197,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
           interest: genInterest,
           classCode: selectedClassCode,
           refinementPrompt: storyPrompt.trim(),
+          targetLanguage: "English", // MVP Lock: Always generate in English for Speech-to-Text support
           autoSave: true,
         }),
       });
@@ -297,11 +298,11 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
 
   if (!isAuth) {
     return (
-      <div className="max-w-sm mx-auto bg-white p-7 rounded-[32px] border-2 border-slate-300 shadow-xl text-center space-y-4 my-auto animate-fadeIn">
-        <div className="w-14 h-14 bg-amber-100 text-amber-900 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-1 border border-amber-300">
+      <div className="max-w-sm mx-auto bg-white p-6 sm:p-7 rounded-[28px] sm:rounded-[32px] border-2 border-slate-300 shadow-xl text-center space-y-4 my-auto animate-fadeIn">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-100 text-amber-900 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-1 border border-amber-300">
           🔑
         </div>
-        <h2 className="text-2xl font-black text-slate-900">
+        <h2 className="text-xl sm:text-2xl font-black text-slate-900">
           {t("teacherLoginTitle")}
         </h2>
         <p className="text-xs font-semibold text-slate-600">
@@ -320,18 +321,18 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
             placeholder="Username (guru)"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3.5 bg-white border-2 border-slate-300 rounded-2xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-orange-500"
+            className="w-full p-3 sm:p-3.5 bg-white border-2 border-slate-300 rounded-2xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-orange-500"
           />
           <input
             type="password"
             placeholder="Password (admin123)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3.5 bg-white border-2 border-slate-300 rounded-2xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-orange-500"
+            className="w-full p-3 sm:p-3.5 bg-white border-2 border-slate-300 rounded-2xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-orange-500"
           />
           <button
             type="submit"
-            className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl shadow-[0_4px_0_0_#9A3412] text-xs transition cursor-pointer"
+            className="w-full py-3 sm:py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl shadow-[0_4px_0_0_#9A3412] text-xs transition cursor-pointer"
           >
             {t("enterTeacherPortal")}
           </button>
@@ -341,12 +342,12 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto w-full bg-white p-6 sm:p-8 rounded-[36px] border-2 border-slate-300 shadow-xl space-y-6 my-auto animate-fadeIn">
+    <div className="max-w-5xl mx-auto w-full bg-white p-4 sm:p-8 rounded-[28px] sm:rounded-[36px] border-2 border-slate-300 shadow-xl space-y-6 my-auto animate-fadeIn">
       {/* Top Header Controls */}
-      <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="min-w-0 space-y-1">
-          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <h2 className="text-xl font-black text-slate-900">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-black text-slate-900">
               {t("teacherDashboardTitle")}
             </h2>
             {classes.length > 0 ? (
@@ -357,7 +358,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                   const active = classes.find((c) => c.code === e.target.value);
                   if (active) setSelectedGrade(active.grade);
                 }}
-                className="max-w-full bg-amber-100 text-slate-900 font-bold text-xs px-3 py-1.5 rounded-xl border-2 border-amber-400 outline-none cursor-pointer"
+                className="max-w-full bg-amber-100 text-slate-900 font-bold text-xs px-2.5 py-1.5 rounded-xl border-2 border-amber-400 outline-none cursor-pointer"
               >
                 {classes.map((c) => (
                   <option
@@ -370,7 +371,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                 ))}
               </select>
             ) : (
-              <span className="text-xs font-black text-rose-700 bg-rose-100 px-3 py-1 rounded-xl border border-rose-300">
+              <span className="text-xs font-black text-rose-700 bg-rose-100 px-2.5 py-1 rounded-xl border border-rose-300">
                 No active classes
               </span>
             )}
@@ -380,21 +381,22 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
           </p>
         </div>
 
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+        {/* Action Tabs Bar */}
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <button
             onClick={() => setActiveTab("classes")}
-            className={`text-xs font-black px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer ${
+            className={`shrink-0 text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === "classes"
                 ? "bg-orange-600 text-white shadow-xs"
                 : "bg-slate-100 text-slate-800 hover:bg-slate-200"
             }`}
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-3.5 h-3.5" />
             <span>{t("tabClasses")}</span>
           </button>
           <button
             onClick={() => setActiveTab("stories")}
-            className={`text-xs font-black px-3.5 py-2 rounded-xl transition cursor-pointer ${
+            className={`shrink-0 text-xs font-black px-3 py-2 rounded-xl transition cursor-pointer ${
               activeTab === "stories"
                 ? "bg-orange-600 text-white shadow-xs"
                 : "bg-slate-100 text-slate-800 hover:bg-slate-200"
@@ -404,7 +406,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`text-xs font-black px-3.5 py-2 rounded-xl transition cursor-pointer ${
+            className={`shrink-0 text-xs font-black px-3 py-2 rounded-xl transition cursor-pointer ${
               activeTab === "analytics"
                 ? "bg-orange-600 text-white shadow-xs"
                 : "bg-slate-100 text-slate-800 hover:bg-slate-200"
@@ -415,28 +417,28 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
           <button
             onClick={fetchData}
             disabled={loading}
-            className="p-2 bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-xl transition cursor-pointer"
+            className="shrink-0 p-2 bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-xl transition cursor-pointer"
             title="Refresh Data"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+            />
           </button>
           <button
             onClick={onExit}
-            className="text-xs font-black text-rose-600 bg-rose-50 hover:bg-rose-100 p-2 rounded-xl flex items-center gap-1 cursor-pointer transition"
+            className="shrink-0 text-xs font-black text-rose-600 bg-rose-50 hover:bg-rose-100 p-2 rounded-xl flex items-center gap-1 cursor-pointer transition"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* ======================================================== */}
-      {/* TAB 1: CLASSES & STUDENT ROSTER                          */}
-      {/* ======================================================== */}
+      {/* TAB 1: CLASSES & STUDENT ROSTER */}
       {activeTab === "classes" && (
         <div className="space-y-6 animate-fadeIn">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Create New Class */}
-            <div className="bg-amber-50/60 p-6 rounded-3xl border-2 border-amber-300 space-y-4">
+            <div className="bg-amber-50/60 p-5 sm:p-6 rounded-3xl border-2 border-amber-300 space-y-4">
               <div className="flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-orange-600" />
                 <h3 className="font-black text-slate-900 text-sm">
@@ -453,7 +455,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                     placeholder="e.g. Grade 3 Orion"
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
-                    className="w-full p-3 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-orange-500"
+                    className="w-full p-2.5 sm:p-3 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-orange-500"
                   />
                 </div>
 
@@ -464,7 +466,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                   <select
                     value={newClassGrade}
                     onChange={(e) => setNewClassGrade(e.target.value)}
-                    className="w-full p-3 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-orange-500"
+                    className="w-full p-2.5 sm:p-3 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-orange-500"
                   >
                     <option value="Grade 1">Grade 1 (Early Phonics)</option>
                     <option value="Grade 2">Grade 2 (Simple Sentences)</option>
@@ -484,7 +486,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
               </form>
             </div>
 
-            <div className="bg-sky-50/60 p-6 rounded-3xl border-2 border-sky-300 space-y-4">
+            <div className="bg-sky-50/60 p-5 sm:p-6 rounded-3xl border-2 border-sky-300 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-sky-700" />
@@ -504,7 +506,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                 <span className="block text-[10px] font-black uppercase text-sky-700">
                   {t("codeToShare")}
                 </span>
-                <span className="font-mono text-3xl font-black tracking-widest text-slate-900">
+                <span className="font-mono text-2xl sm:text-3xl font-black tracking-widest text-slate-900">
                   {selectedClassCode || "—"}
                 </span>
               </div>
@@ -512,7 +514,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
           </div>
 
           {/* Roster / Registered Students List */}
-          <div className="p-5 bg-white border-2 border-slate-300 rounded-3xl space-y-3 shadow-xs">
+          <div className="p-4 sm:p-5 bg-white border-2 border-slate-300 rounded-3xl space-y-3 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
               <h4 className="font-black text-slate-900 text-sm flex items-center gap-2">
                 <span>
@@ -533,7 +535,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                 {studentsList.map((std) => (
                   <div
                     key={std.id}
-                    className="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl space-y-3"
+                    className="p-3.5 sm:p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl space-y-3"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -581,12 +583,10 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* TAB 2: AI STORY BANK & VERIFICATION                      */}
-      {/* ======================================================== */}
+      {/* TAB 2: AI STORY BANK & VERIFICATION */}
       {activeTab === "stories" && (
         <div className="space-y-4 animate-fadeIn">
-          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible scrollbar-none">
             {interestOverview.map((overview) => (
               <button
                 key={overview.title}
@@ -606,7 +606,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
           </div>
 
           {/* Action Generator Box */}
-          <div className="rounded-3xl border-2 border-slate-300 bg-slate-50 p-5">
+          <div className="rounded-3xl border-2 border-slate-300 bg-slate-50 p-4 sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -618,7 +618,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                     {t("studentsCount")}
                   </span>
                 </div>
-                <label className="text-xs font-bold text-slate-700">
+                <label className="text-xs font-bold text-slate-700 block">
                   {t("storyBrief")}
                   <textarea
                     value={storyPrompt}
@@ -650,36 +650,38 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
             {stories.map((s) => (
               <div
                 key={s.id}
-                className="relative rounded-2xl border border-slate-300 bg-white p-4 shadow-xs"
+                className="relative rounded-2xl border border-slate-300 bg-white p-4 shadow-xs flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-black text-slate-500">
-                      <span>{s.country_origin}</span>
-                      <span>·</span>
-                      <span>{s.word_count} words</span>
-                      <span>·</span>
-                      <span>{s.grade}</span>
+                <div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-black text-slate-500">
+                        <span>{s.country_origin}</span>
+                        <span>·</span>
+                        <span>{s.word_count} words</span>
+                        <span>·</span>
+                        <span>{s.grade}</span>
+                      </div>
+                      <h4 className="mt-1 truncate text-sm font-black text-slate-900">
+                        {s.title}
+                      </h4>
                     </div>
-                    <h4 className="mt-1 truncate text-sm font-black text-slate-900">
-                      {s.title}
-                    </h4>
+                    <span
+                      className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black ${s.is_verified ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
+                    >
+                      {s.is_verified ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <ShieldCheck className="h-3 w-3" />
+                      )}
+                      {s.is_verified ? t("verifiedBadge") : t("reviewBadge")}
+                    </span>
                   </div>
-                  <span
-                    className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black ${s.is_verified ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
-                  >
-                    {s.is_verified ? (
-                      <CheckCircle2 className="h-3 w-3" />
-                    ) : (
-                      <ShieldCheck className="h-3 w-3" />
-                    )}
-                    {s.is_verified ? t("verifiedBadge") : t("reviewBadge")}
-                  </span>
-                </div>
 
-                <p className="mt-2 line-clamp-2 text-xs font-medium leading-relaxed text-slate-600">
-                  {s.passage_text}
-                </p>
+                  <p className="mt-2 line-clamp-2 text-xs font-medium leading-relaxed text-slate-600">
+                    {s.passage_text}
+                  </p>
+                </div>
 
                 <div className="mt-3 flex items-center justify-end gap-3 border-t border-slate-200 pt-3">
                   <button
@@ -697,13 +699,12 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* TAB 3: ANALYTICS & STUDENT SCREENING RESULTS             */}
-      {/* ======================================================== */}
+      {/* TAB 3: ANALYTICS & RESPONSIVE STUDENT SCREENING RESULTS */}
       {activeTab === "analytics" && (
         <div className="space-y-4 animate-fadeIn">
-          <div className="border-2 border-slate-300 rounded-2xl overflow-hidden shadow-xs">
-            <table className="w-full text-left text-xs">
+          {/* Desktop & Tablet Table View */}
+          <div className="hidden sm:block border-2 border-slate-300 rounded-2xl overflow-x-auto shadow-xs">
+            <table className="w-full text-left text-xs min-w-[620px]">
               <thead className="bg-slate-100 border-b border-slate-300 text-slate-800 font-black">
                 <tr>
                   <th className="p-3">Student Name</th>
@@ -717,75 +718,163 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {groupedStudents.map((std) => (
-                  <tr
-                    key={std.name}
-                    className="hover:bg-amber-50/50 transition"
-                  >
-                    <td className="p-3 font-black text-slate-900 flex items-center gap-2">
-                      <span>{std.avatar}</span>
-                      <button
-                        onClick={() => setSelectedStudent(std)}
-                        className="hover:text-orange-700 font-black text-left cursor-pointer hover:underline"
-                      >
-                        {std.name}
-                      </button>
-                    </td>
-                    <td className="p-3 font-mono font-bold text-orange-700">
-                      {std.latestWcpm} WCPM
-                    </td>
-                    <td className="p-3 font-mono font-bold text-slate-800">
-                      {std.latestAccuracy}%
-                    </td>
-                    <td className="p-3 font-mono font-bold text-purple-700">
-                      {std.latestBloom}/100
-                    </td>
-                    <td className="p-3 font-mono font-black text-indigo-700">
-                      {std.latestComposite}/100
-                    </td>
-                    <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300">
-                        {std.totalAttempts}x
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-black ${
-                          std.status === "green"
-                            ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
-                            : std.status === "yellow"
-                              ? "bg-amber-100 text-amber-900 border border-amber-300"
-                              : "bg-rose-100 text-rose-900 border border-rose-300"
-                        }`}
-                      >
-                        {std.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right">
-                      <button
-                        onClick={() => setSelectedStudent(std)}
-                        className="px-3 py-1 bg-blue-100 text-blue-900 font-bold rounded-lg text-xs border border-blue-300 cursor-pointer hover:bg-blue-200 transition"
-                      >
-                        View Log
-                      </button>
+                {groupedStudents.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="p-8 text-center text-slate-500 font-bold italic"
+                    >
+                      {t("noScreeningData")}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  groupedStudents.map((std) => (
+                    <tr
+                      key={std.name}
+                      className="hover:bg-amber-50/50 transition"
+                    >
+                      <td className="p-3 font-black text-slate-900 flex items-center gap-2">
+                        <span>{std.avatar}</span>
+                        <button
+                          onClick={() => setSelectedStudent(std)}
+                          className="hover:text-orange-700 font-black text-left cursor-pointer hover:underline"
+                        >
+                          {std.name}
+                        </button>
+                      </td>
+                      <td className="p-3 font-mono font-bold text-orange-700">
+                        {std.latestWcpm} WCPM
+                      </td>
+                      <td className="p-3 font-mono font-bold text-slate-800">
+                        {std.latestAccuracy}%
+                      </td>
+                      <td className="p-3 font-mono font-bold text-purple-700">
+                        {std.latestBloom}/100
+                      </td>
+                      <td className="p-3 font-mono font-black text-indigo-700">
+                        {std.latestComposite}/100
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300">
+                          {std.totalAttempts}x
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                            std.status === "green"
+                              ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                              : std.status === "yellow"
+                                ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                : "bg-rose-100 text-rose-900 border border-rose-300"
+                          }`}
+                        >
+                          {std.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => setSelectedStudent(std)}
+                          className="px-3 py-1 bg-blue-100 text-blue-900 font-bold rounded-lg text-xs border border-blue-300 cursor-pointer hover:bg-blue-200 transition"
+                        >
+                          View Log
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card List View (< sm breakpoint) */}
+          <div className="block sm:hidden space-y-3">
+            {groupedStudents.length === 0 ? (
+              <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl text-center text-slate-500 font-bold text-xs italic">
+                {t("noScreeningData")}
+              </div>
+            ) : (
+              groupedStudents.map((std) => (
+                <div
+                  key={std.name}
+                  className="p-4 bg-white border-2 border-slate-300 rounded-2xl shadow-xs space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{std.avatar}</span>
+                      <div>
+                        <h4 className="text-sm font-black text-slate-900">
+                          {std.name}
+                        </h4>
+                        <span className="text-[10px] font-bold text-slate-500">
+                          {std.totalAttempts} {t("screeningSessions")}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                        std.status === "green"
+                          ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                          : std.status === "yellow"
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : "bg-rose-100 text-rose-900 border border-rose-300"
+                      }`}
+                    >
+                      {std.status.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="p-2 bg-orange-50 rounded-xl border border-orange-200">
+                      <span className="block text-[9px] font-bold text-slate-500 uppercase">
+                        Fluency
+                      </span>
+                      <span className="font-mono font-black text-orange-700">
+                        {std.latestWcpm} WCPM
+                      </span>
+                    </div>
+                    <div className="p-2 bg-purple-50 rounded-xl border border-purple-200">
+                      <span className="block text-[9px] font-bold text-slate-500 uppercase">
+                        Bloom
+                      </span>
+                      <span className="font-mono font-black text-purple-700">
+                        {std.latestBloom}/100
+                      </span>
+                    </div>
+                    <div className="p-2 bg-indigo-50 rounded-xl border border-indigo-200">
+                      <span className="block text-[9px] font-bold text-slate-500 uppercase">
+                        Composite
+                      </span>
+                      <span className="font-mono font-black text-indigo-700">
+                        {std.latestComposite}/100
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedStudent(std)}
+                    className="w-full py-2 bg-blue-100 text-blue-900 font-bold rounded-xl text-xs border border-blue-300 cursor-pointer"
+                  >
+                    View Diagnostic Log
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
 
       {/* MODAL: STUDENT PROFILE & ASSIGNMENT */}
       {profileStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-fadeIn">
-          <div className="max-h-[90vh] w-full max-w-2xl space-y-5 overflow-y-auto rounded-[32px] border-2 border-slate-300 bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 pb-4">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">{profileStudent.avatar}</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4 backdrop-blur-xs animate-fadeIn">
+          <div className="max-h-[90vh] w-full max-w-2xl space-y-4 sm:space-y-5 overflow-y-auto rounded-[28px] sm:rounded-[32px] border-2 border-slate-300 bg-white p-4 sm:p-6 shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="text-3xl sm:text-4xl">
+                  {profileStudent.avatar}
+                </span>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900">
                     {profileStudent.name}
                   </h3>
                   <p className="text-xs font-bold text-slate-500">
@@ -795,23 +884,23 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
               </div>
               <button
                 onClick={() => setProfileStudent(null)}
-                className="h-8 w-8 rounded-full bg-slate-200 font-bold text-slate-800 cursor-pointer hover:bg-slate-300"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-slate-200 font-bold text-slate-800 cursor-pointer hover:bg-slate-300 text-xs sm:text-sm"
               >
                 ✕
               </button>
             </div>
 
             {/* Profile Detail Cards */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-2.5 sm:p-3">
                 <span className="block text-[10px] font-black uppercase text-slate-500">
                   School Grade
                 </span>
-                <span className="text-sm font-black text-slate-900">
+                <span className="text-xs sm:text-sm font-black text-slate-900">
                   {profileStudent.school_grade || selectedGrade}
                 </span>
               </div>
-              <label className="rounded-2xl border border-orange-200 bg-orange-50 p-3">
+              <label className="rounded-2xl border border-orange-200 bg-orange-50 p-2.5 sm:p-3 block">
                 <span className="block text-[10px] font-black uppercase text-orange-700">
                   Reading Level
                 </span>
@@ -827,18 +916,18 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                       reading_level: event.target.value,
                     })
                   }
-                  className="mt-1 w-full rounded-lg border border-orange-300 bg-white p-1.5 text-xs font-black text-slate-900 outline-none"
+                  className="mt-1 w-full rounded-lg border border-orange-300 bg-white p-1 text-xs font-black text-slate-900 outline-none"
                 >
                   {GRADE_LEVELS.map((grade) => (
                     <option key={grade}>{grade}</option>
                   ))}
                 </select>
               </label>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-2.5 sm:p-3">
                 <span className="block text-[10px] font-black uppercase text-slate-500">
                   Location
                 </span>
-                <span className="text-sm font-black text-slate-900">
+                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
                   {profileStudent.location || "Not specified"}
                 </span>
               </div>
@@ -846,10 +935,10 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
 
             {/* Student Interests Badges */}
             <div>
-              <span className="mb-2 block text-xs font-black text-slate-800">
+              <span className="mb-1.5 block text-xs font-black text-slate-800">
                 Student Interests
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {(profileStudent.interests || []).length > 0 ? (
                   profileStudent.interests.map((interest: string) => {
                     const category = INTEREST_CATEGORIES.find(
@@ -858,7 +947,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                     return (
                       <span
                         key={interest}
-                        className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-black text-amber-900"
+                        className="rounded-full border border-amber-300 bg-amber-100 px-2.5 py-0.5 text-xs font-black text-amber-900"
                       >
                         {category?.emoji || "📖"} {interest}
                       </span>
@@ -872,10 +961,10 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
               </div>
             </div>
 
-            {/* Interest Details Field */}
+            {/* Interest Details */}
             <div className="rounded-2xl border border-sky-200 bg-sky-50 p-3">
               <span className="block text-[10px] font-black uppercase text-sky-800">
-                Hobbies &amp; Detailed Reading Interests
+                Hobbies &amp; Reading Interests
               </span>
               <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-700">
                 {profileStudent.interest_details ||
@@ -884,12 +973,12 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
             </div>
 
             {/* Activity Checkboxes Assignment Module */}
-            <div className="rounded-3xl border-2 border-sky-200 bg-sky-50 p-5">
-              <div className="mb-3">
-                <h4 className="text-sm font-black text-slate-900">
+            <div className="rounded-3xl border-2 border-sky-200 bg-sky-50 p-4 sm:p-5">
+              <div className="mb-2 sm:mb-3">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900">
                   Assign Activities
                 </h4>
-                <p className="text-xs font-semibold text-slate-600">
+                <p className="text-[11px] sm:text-xs font-semibold text-slate-600">
                   Select the modules the student must complete in their next
                   quest.
                 </p>
@@ -926,15 +1015,15 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                           [activityKey]: !enabled,
                         })
                       }
-                      className={`rounded-2xl border-2 p-3 text-left cursor-pointer transition ${enabled ? "border-sky-600 bg-white shadow-xs" : "border-slate-200 bg-slate-100 hover:bg-slate-200/60"}`}
+                      className={`rounded-2xl border-2 p-2.5 sm:p-3 text-left cursor-pointer transition ${enabled ? "border-sky-600 bg-white shadow-xs" : "border-slate-200 bg-slate-100 hover:bg-slate-200/60"}`}
                     >
                       <span className="flex items-center justify-between text-xs font-black text-slate-900">
                         {label}{" "}
                         {enabled && (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                         )}
                       </span>
-                      <span className="mt-1 block text-[10px] font-semibold text-slate-500">
+                      <span className="mt-0.5 block text-[10px] font-semibold text-slate-500">
                         {description}
                       </span>
                     </button>
@@ -974,11 +1063,11 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
 
       {/* MODAL: REVIEW STORY & QUESTIONS */}
       {inspectStory && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white max-w-2xl w-full p-6 rounded-[32px] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border-2 border-slate-300">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
+          <div className="bg-white max-w-2xl w-full p-4 sm:p-6 rounded-[28px] sm:rounded-[32px] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border-2 border-slate-300">
             <div className="flex items-center justify-between border-b pb-2">
               <div>
-                <h3 className="text-xl font-black text-slate-900">
+                <h3 className="text-base sm:text-xl font-black text-slate-900">
                   {inspectStory.title}
                 </h3>
                 <span className="text-xs text-orange-700 font-bold">
@@ -987,13 +1076,13 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
               </div>
               <button
                 onClick={() => setInspectStory(null)}
-                className="w-8 h-8 rounded-full bg-slate-200 text-slate-800 font-bold cursor-pointer hover:bg-slate-300"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-200 text-slate-800 font-bold cursor-pointer hover:bg-slate-300 text-xs sm:text-sm"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-4 bg-amber-50 rounded-2xl text-xs font-bold text-slate-900 leading-relaxed border border-amber-200">
+            <div className="p-3 sm:p-4 bg-amber-50 rounded-2xl text-xs font-bold text-slate-900 leading-relaxed border border-amber-200 max-h-40 overflow-y-auto">
               {inspectStory.passage_text}
             </div>
 
@@ -1037,16 +1126,18 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                     (pair: any, index: number) => (
                       <div
                         key={pair.id || index}
-                        className="flex flex-col gap-2 rounded-lg border border-purple-200 bg-white p-2 sm:grid sm:grid-cols-[1fr_auto_1fr_auto] sm:items-center"
+                        className="flex flex-col gap-1 sm:gap-2 rounded-lg border border-purple-200 bg-white p-2 sm:grid sm:grid-cols-[1fr_auto_1fr_auto] sm:items-center"
                       >
                         <span className="font-semibold text-slate-800">
                           {pair.causeText}
                         </span>
-                        <span className="font-black text-purple-700">→</span>
+                        <span className="font-black text-purple-700 hidden sm:inline">
+                          →
+                        </span>
                         <span className="font-semibold text-slate-800">
                           {pair.effectText}
                         </span>
-                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-black text-purple-800">
+                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-black text-purple-800 self-start sm:self-auto">
                           {pair.weight} pts
                         </span>
                       </div>
@@ -1065,9 +1156,9 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                   {inspectPlanSteps.map((step, index) => (
                     <div
                       key={step.id}
-                      className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-white p-2"
+                      className="flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-white p-2"
                     >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-black text-emerald-800">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-black text-emerald-800">
                         {index + 1}
                       </span>
                       <span className="font-semibold text-slate-800">
@@ -1093,7 +1184,7 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
                   {inspectEvidenceItems.map((evidence, index) => (
                     <div
                       key={evidence.id}
-                      className="flex items-start justify-between gap-3 rounded-lg border border-rose-200 bg-white p-2"
+                      className="flex items-start justify-between gap-2.5 rounded-lg border border-rose-200 bg-white p-2"
                     >
                       <span className="font-semibold text-slate-800">
                         {index + 1}. {evidence.text}
@@ -1130,30 +1221,30 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
 
       {/* MODAL: STUDENT DIAGNOSTICS */}
       {selectedStudent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white max-w-2xl w-full p-6 rounded-[32px] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border-2 border-slate-300">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
+          <div className="bg-white max-w-2xl w-full p-4 sm:p-6 rounded-[28px] sm:rounded-[32px] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border-2 border-slate-300">
             <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="text-xl font-black text-slate-900">
+              <h3 className="text-lg sm:text-xl font-black text-slate-900">
                 {selectedStudent.name}
               </h3>
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="w-8 h-8 rounded-full bg-slate-200 text-slate-800 font-bold cursor-pointer hover:bg-slate-300"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-200 text-slate-800 font-bold cursor-pointer hover:bg-slate-300 text-xs sm:text-sm"
               >
                 ✕
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-2 text-center text-xs font-black">
-              <div className="p-3 bg-blue-50 text-blue-950 border border-blue-200 rounded-xl">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs font-black">
+              <div className="p-2.5 sm:p-3 bg-blue-50 text-blue-950 border border-blue-200 rounded-xl">
                 C1: {selectedStudent.latestRecord.c1_score}/15
               </div>
-              <div className="p-3 bg-purple-50 text-purple-950 border border-purple-200 rounded-xl">
+              <div className="p-2.5 sm:p-3 bg-purple-50 text-purple-950 border border-purple-200 rounded-xl">
                 C2: {selectedStudent.latestRecord.c2_score}/25
               </div>
-              <div className="p-3 bg-emerald-50 text-emerald-950 border border-emerald-200 rounded-xl">
+              <div className="p-2.5 sm:p-3 bg-emerald-50 text-emerald-950 border border-emerald-200 rounded-xl">
                 C3: {selectedStudent.latestRecord.c3_score}/30
               </div>
-              <div className="p-3 bg-rose-50 text-rose-950 border border-rose-200 rounded-xl">
+              <div className="p-2.5 sm:p-3 bg-rose-50 text-rose-950 border border-rose-200 rounded-xl">
                 C4: {selectedStudent.latestRecord.c4_score}/30
               </div>
             </div>
@@ -1162,24 +1253,28 @@ export default function TeacherDashboard({ onExit }: { onExit: () => void }) {
               &ldquo;{selectedStudent.latestRecord.transcribed_text}&rdquo;
             </div>
 
-            <div className="space-y-1.5 text-xs">
+            <div className="space-y-2 text-xs">
               <p>
-                <strong className="text-slate-900">Strength:</strong>{" "}
-                <span className="text-slate-700">
+                <strong className="text-slate-900 block">
+                  {t("strengthLabel")}
+                </strong>
+                <span className="text-slate-700 leading-relaxed">
                   {selectedStudent.latestRecord.strength}
                 </span>
               </p>
               <p>
-                <strong className="text-slate-900">Weakness:</strong>{" "}
-                <span className="text-slate-700">
+                <strong className="text-slate-900 block">
+                  {t("weaknessLabel")}
+                </strong>
+                <span className="text-slate-700 leading-relaxed">
                   {selectedStudent.latestRecord.weakness}
                 </span>
               </p>
               <p>
-                <strong className="text-slate-900">
-                  Teacher Recommendation:
-                </strong>{" "}
-                <span className="text-slate-700">
+                <strong className="text-slate-900 block">
+                  {t("solutionLabel")}
+                </strong>
+                <span className="text-slate-700 leading-relaxed">
                   {selectedStudent.latestRecord.solution}
                 </span>
               </p>

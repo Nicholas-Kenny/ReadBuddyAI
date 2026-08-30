@@ -36,6 +36,7 @@ function MainContent() {
             >
               <option value="en">🇬🇧 English</option>
               <option value="id">🇮🇩 Indonesia</option>
+              <option value="ms">🇲🇾 Malaysia</option>
               <option value="fil">🇵🇭 Filipino</option>
             </select>
           </div>

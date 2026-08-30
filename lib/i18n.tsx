@@ -2,19 +2,32 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-export type Language = "en" | "id" | "fil";
+export type Language = "en" | "id" | "fil" | "ms";
 
 export const translations = {
   en: {
     // Header & Common
     studentPortal: "Student Portal",
     teacherPortal: "Teacher Portal",
-    footerText: "ReadBuddy AI © 2026 — Verified ASEAN Literacy Screening",
+    footerText: "ReadBuddy AI © 2026 — Literacy Screening Tools",
     back: "Back",
     logout: "Logout",
     saving: "Saving...",
     checking: "Checking...",
     connecting: "Connecting...",
+    viewStory: "📖 View Story",
+    hideStory: "✕ Close Story",
+    prevBtn: "← Back",
+    storyReference: "Story Reference",
+
+    recordedSuccess: "✓ Audio Recorded",
+    accuracy: "Accuracy",
+    reRecord: "Re-record",
+    noScreeningData: "No screening data for this class yet.",
+    screeningSessions: "Screening Sessions",
+    strengthLabel: "Strength:",
+    weaknessLabel: "Weakness:",
+    solutionLabel: "Teacher Recommendation:",
 
     // Student Auth & Onboarding
     profileTitle: "Student Learning Profile",
@@ -132,6 +145,19 @@ export const translations = {
     saving: "Menyimpan...",
     checking: "Memeriksa...",
     connecting: "Menghubungkan...",
+    viewStory: "📖 Lihat Cerita",
+    hideStory: "✕ Tutup Cerita",
+    prevBtn: "← Kembali",
+    storyReference: "Teks Cerita",
+
+    recordedSuccess: "✓ Suara Terekam",
+    accuracy: "Akurasi",
+    reRecord: "Rekam Ulang",
+    noScreeningData: "Belum ada pengerjaan skrining untuk kelas ini.",
+    screeningSessions: "Sesi Skrining",
+    strengthLabel: "Kekuatan (Strength):",
+    weaknessLabel: "Hambatan (Weakness):",
+    solutionLabel: "Solusi Guru:",
 
     // Student Auth & Onboarding
     profileTitle: "Profil Belajar Siswa",
@@ -247,6 +273,19 @@ export const translations = {
     saving: "Nagse-save...",
     checking: "Sinusuri...",
     connecting: "Kumokonekta...",
+    viewStory: "📖 Tingnan ang Kwento",
+    hideStory: "✕ Isara ang Kwento",
+    prevBtn: "← Bumalik",
+    storyReference: "Teksto ng Kwento",
+
+    recordedSuccess: "✓ Na-record na Audio",
+    accuracy: "Katumpakan",
+    reRecord: "I-record Ulit",
+    noScreeningData: "Wala pang data ng pagsusuri para sa klaseng ito.",
+    screeningSessions: "Mga Sesyon ng Pagsusuri",
+    strengthLabel: "Lakas (Strength):",
+    weaknessLabel: "Kahinaan (Weakness):",
+    solutionLabel: "Rekomendasyon ng Guro:",
 
     // Student Auth & Onboarding
     profileTitle: "Profile sa Pagkatuto ng Mag-aaral",
@@ -355,6 +394,136 @@ export const translations = {
     saveProfileAndAssignment: "I-save ang Profile at Takdang-Aralin",
     openCategoryGenerator: "Buksan ang Tagabuo ng Kategorya →",
   },
+
+  ms: {
+    // Header & Common
+    studentPortal: "Portal Pelajar",
+    teacherPortal: "Portal Guru",
+    footerText: "ReadBuddy AI © 2026 — Alat Saringan Literasi",
+    back: "Kembali",
+    logout: "Log Keluar",
+    saving: "Menyimpan...",
+    checking: "Menyemak...",
+    connecting: "Menyambung...",
+    viewStory: "📖 Lihat Cerita",
+    hideStory: "✕ Tutup Cerita",
+    prevBtn: "← Kembali",
+    storyReference: "Teks Cerita",
+
+    recordedSuccess: "✓ Suara Direkodkan",
+    accuracy: "Ketepatan",
+    reRecord: "Rakam Semula",
+    noScreeningData: "Tiada data saringan untuk kelas ini lagi.",
+    screeningSessions: "Sesi Saringan",
+    strengthLabel: "Kekuatan:",
+    weaknessLabel: "Kelemahan:",
+    solutionLabel: "Cadangan Guru:",
+
+    // Student Auth & Onboarding
+    profileTitle: "Profil Pembelajaran Pelajar",
+    profileSubtitle: "Buat profil atau log masuk sebelum menyertai kelas.",
+    registerNewProfile: "Daftar Profil Baru",
+    loginToProfile: "Log Masuk ke Profil",
+    profileRegTitle: "Pendaftaran Profil",
+    profileRegSubtitle:
+      "Kod kelas akan dimasukkan selepas melengkapkan profil.",
+    nickname: "Nama Panggilan",
+    loginId: "ID Log Masuk",
+    personalPin: "PIN Peribadi",
+    pinPlaceholder: "Min. 4 digit",
+    schoolGrade: "Tingkatan Sekolah",
+    location: "Lokasi",
+    readingInterests: "Minat Membaca",
+    selectOneOrMore: "Pilih satu atau lebih",
+    interestDetailsLabel: "Beritahu kami lebih lanjut tentang minat anda",
+    optional: "(pilihan)",
+    interestDetailsPlaceholder:
+      "Cth: Saya suka bola sepak, robot, haiwan marin, dan cerita pengembaraan.",
+    registerAndContinue: "Daftar & Teruskan",
+    loginTitle: "Log Masuk Pelajar",
+    loginSubtitle: "Log masuk dahulu, kemudian sertai kelas anda.",
+    loginBtn: "Log Masuk",
+
+    // Student Class & Stories
+    helloStudent: "Helo",
+    classIntro:
+      "Profil anda sedia. Sila masukkan kod kelas daripada guru anda.",
+    joinClassBtn: "Sertai Kelas",
+    changeClass: "Tukar kelas",
+    yourInterestLibrary: "Pustaka Minat Anda",
+    selectStorySubtitle: "Pilih cerita yang ingin dibaca hari ini:",
+    storiesCount: "cerita",
+    waitingTeacherAssignment: "Menunggu tugasan guru",
+    waitingTeacherSubtitle:
+      "Guru anda sedang menyediakan modul aktiviti membaca untuk profil anda.",
+    noVerifiedStories: "Belum ada cerita yang disahkan untuk minat anda",
+    noVerifiedStoriesSubtitle:
+      "Guru anda sedang menyediakan dan mengesahkan cerita di Portal Guru.",
+    startFirstQuest: "Mula Tugasan Pertama →",
+
+    // Quest Screening
+    startReading: "MULA MEMBACA",
+    startQuest: "MULA PERMAINAN",
+    startRecording: "Mula Rakam Suara",
+    finishReading: "Selesai Membaca",
+    voiceHeard: "Didengar",
+    c1Remembering: "Aras C1: Mengingat",
+    c2Understanding: "Aras C2: Memahami",
+    c3PlanBuilder: "C3 · Pembina Pelan",
+    c4EvidenceDetective: "C4 · Detektif Bukti",
+    c3Instruction:
+      "Susun langkah dari pertama hingga akhir menggunakan butang anak panah:",
+    storyClaim: "Penyataan Cerita:",
+    c4InstructionDefault:
+      "Pilih {count} ayat yang paling menyokong penyataan di atas.",
+    selectedCount: "Dipilih",
+    nextBtn: "Seterusnya →",
+    finishAndSubmit: "Selesai & Hantar 🏆",
+    screeningDoneTitle: "Saringan Selesai!",
+    fluencyLabel: "Kelancaran",
+    bloomGamesLabel: "Permainan Bloom",
+    backToHome: "Kembali ke Laman Utama",
+
+    // Teacher Dashboard
+    teacherLoginTitle: "Log Masuk Guru",
+    teacherLoginSubtitle:
+      "Log masuk untuk mengurus kelas dan mengesahkan cerita AI",
+    enterTeacherPortal: "Masuk Portal Guru",
+    teacherDashboardTitle: "Papan Pemuka Guru & Pengesah AI",
+    teacherSubtitle:
+      "Urus senarai pelajar, bank cerita AI, dan hasil saringan literasi",
+    tabClasses: "Kelas & Pelajar",
+    tabStoryBank: "Bank Cerita AI",
+    tabAnalytics: "Keputusan Saringan",
+    createNewClass: "Cipta Kelas Baru",
+    className: "Nama Kelas",
+    targetGrade: "Tingkatan Sasaran",
+    generateClassBtn: "+ Jana Kelas Baru (Kod 4 Digit)",
+    studentSelfRegTitle: "Pendaftaran Kendiri Pelajar",
+    studentSelfRegDesc:
+      "Pelajar membuat profil dan PIN secara berasingan, lalu masukkan kod kelas.",
+    codeToShare: "Kod Kelas untuk Dikongsi",
+    classRoster: "Senarai Kelas",
+    studentsCount: "Pelajar",
+    noStudentsRegistered:
+      "Belum ada pelajar yang menyertai kelas ini. Kongsi kod kelas kepada pelajar.",
+    inspectAndAssign: "Semak & Tetapkan",
+    assigned: "Ditetapkan",
+    needsReview: "Perlu disemak",
+    storyBrief: "Ringkasan Cerita",
+    storyBriefPlaceholder:
+      "Cth: Cerita tentang kerjasama membersihkan sungai selepas hujan, paparkan kanak-kanak dan burung enggang.",
+    generateStoryTask: "Jana Tugasan",
+    generatingWithGemini: "Menjana dengan Gemini...",
+    verifiedBadge: "Disahkan",
+    reviewBadge: "Semak",
+    reviewAndVerifyBtn: "Semak & Sahkan",
+    inspectC1C4Btn: "Semak C1–C4",
+    unverifyStory: "Batal Pengesahan Cerita",
+    verifyStoryAndQuestions: "Sahkan Cerita & Semua Soalan C1–C4",
+    saveProfileAndAssignment: "Simpan Profil & Tugasan",
+    openCategoryGenerator: "Buka Penjana Kategori →",
+  },
 };
 
 interface LanguageContextType {
@@ -375,7 +544,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("readbuddy_lang") as Language;
-    if (saved && (saved === "en" || saved === "id" || saved === "fil")) {
+    if (
+      saved &&
+      (saved === "en" || saved === "id" || saved === "fil" || saved === "ms")
+    ) {
       setLanguageState(saved);
     }
   }, []);
